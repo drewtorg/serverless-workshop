@@ -2,6 +2,7 @@ service: workshop-drewtorg
 
 plugins:
   - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
@@ -10,24 +11,6 @@ provider:
   region: eu-west-1
   tags:
     TEAM: test
-
-  iamRoleStatements:
-    - Effect: Allow
-      Action: dynamodb:scan
-      Resource:
-        Fn::GetAtt:
-          - restaurantsTable
-          - Arn
-    - Effect: Allow
-      Action: kinesis:PutRecord
-      Resource:
-        Fn::GetAtt:
-          - orderEventsStream
-          - Arn
-    - Effect: Allow
-      Action: sns:Publish
-      Resource:
-        Ref: restaurantNotificationTopic
 
 functions:
   get-index:
@@ -56,6 +39,13 @@ functions:
       - http:
           path: /restaurants/
           method: get
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:scan
+        Resource:
+          Fn::GetAtt:
+            - restaurantsTable
+            - Arn
     environment:
       restaurants_table:
         Ref: restaurantsTable
@@ -66,6 +56,13 @@ functions:
       - http:
           path: /restaurants/search
           method: post
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:scan
+        Resource:
+          Fn::GetAtt:
+            - restaurantsTable
+            - Arn
     environment:
       restaurants_table:
         Ref: restaurantsTable
@@ -76,6 +73,13 @@ functions:
       - http:
           path: /orders
           method: post
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource:
+          Fn::GetAtt:
+            - orderEventsStream
+            - Arn
     environment:
       order_events_stream:
         Ref: orderEventsStream
@@ -89,6 +93,17 @@ functions:
             Fn::GetAtt:
               - orderEventsStream
               - Arn
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource:
+          Fn::GetAtt:
+            - orderEventsStream
+            - Arn
+      - Effect: Allow
+        Action: sns:Publish
+        Resource:
+          Ref: restaurantNotificationTopic
     environment:
       order_events_stream:
         Ref: orderEventsStream
